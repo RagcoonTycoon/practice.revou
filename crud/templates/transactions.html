@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Add jsPDF Library -->
+    <script src="{{ url_for('static', filename='js/jspdf.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jspdf.plugin.autotable.min.js') }}"></script>
+    <title>NightLib</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      body {
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        min-height: 100vh;
+        background-image: url(static/foto/Moonlight.png);
+        background-position: center;
+        background-size: cover;
+      }
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 80px;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 26px 14px;
+        transition: 0.5s;
+      }
+      .sidebar.active {
+        width: 220px;
+      }
+      .sidebar .logo-menu .logo {
+        display: none;
+      }
+      .sidebar.active .logo-menu {
+        display: flex;
+        justify-content: space-between;
+      }
+      .sidebar.active .logo-menu .logo {
+        display: block;
+        font-size: 25px;
+        color: #fff;
+        pointer-events: none;
+        opacity: 0;
+        transition: 0.3s;
+        opacity: 1;
+        transition-delay: 0.2s;
+      }
+      .sidebar .logo-menu {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+      .sidebar.active .logo-menu .logo {
+        display: flex;
+        font-weight: 700;
+        align-items: center;
+      }
+      .sidebar .logo-menu .toggle-btn {
+        font-size: 22px;
+        color: #fff;
+        text-align: center;
+        line-height: 40px;
+        cursor: pointer;
+        transition: 0.5s;
+      }
+      .sidebar .lists {
+        margin-top: 10px;
+        padding: 0;
+      }
+      .sidebar .lists-logout {
+        position: flex;
+        bottom: 0;
+        margin: 435px 0;
+        padding: 0;
+        width: 100%;
+      }
+      .list-item,
+      .list-logout {
+        list-style: none;
+        width: 100%;
+        height: 50px;
+        margin: 5px 0;
+        line-height: 50px;
+      }
+      .list-item a,
+      .list-logout a {
+        display: flex;
+        align-items: center;
+        font-size: 18px;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 6px;
+        white-space: nowrap;
+        transition: 0.5s;
+      }
+      .list-item a:hover,
+      .list-logout a:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      .list-item a i,
+      .list-logout a i {
+        min-width: 50px;
+        height: 50px;
+        text-align: center;
+        line-height: 50px;
+      }
+      .list-item.active a {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      .sidebar .link-name {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .sidebar.active .link-name {
+        opacity: 1;
+        pointer-events: auto;
+        transition-delay: calc(0.1s * var(--i));
+      }
+      h2 {
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-weight: 700;
+        color: #6a94be;
+      }
+      .search-add-container {
+        display: flex;
+        align-items: center;
+        gap: 20px; /* Space between input and button */
+      }
+      .search-add-container input[type="text"] {
+        background-color: rgba(51, 51, 51, 0.5);
+        backdrop-filter: blur(5px);
+        color: #fff;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+      }
+      .search-add-container .form-control {
+        flex: 1; /* Take up remaining space */
+      }
+      .search-add-container .btn {
+        white-space: nowrap; /* Prevent button text from wrapping */
+      }
+      /* Media query for responsiveness */
+      @media (max-width: 768px) {
+        .search-add-container {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .search-add-container .btn {
+          width: 100%; /* Full width button on small screens */
+        }
+      }
+      .content {
+        margin-left: 80px; /* Default margin for small sidebar */
+        padding: 20px;
+        transition: margin-left 0.5s, width 0.5s; /* Smooth transition */
+        width: calc(100% - 80px); /* Default width for small sidebar */
+      }
+      .sidebar.active ~ .content {
+        margin-left: 220px; /* Margin for expanded sidebar */
+        width: calc(100% - 220px); /* Width for expanded sidebar */
+      }
+      .table-container {
+        margin-top: 10px;
+      }
+      table {
+        padding: 20px;
+        width: 92%;
+        border-collapse: collapse;
+      }
+      table th,
+      table td {
+        text-align: center;
+        background-color: rgba(51, 51, 51, 0.5);
+        backdrop-filter: blur(2px);
+        border: 2px solid rgba(163, 163, 163, 0.2);
+        color: white;
+        padding: 8px;
+      }
+      table th {
+        background-color: rgba(0, 0, 0, 0.723);
+        color: #6a94be;
+        text-align: center;
+      }
+      .pagination {
+        justify-content: center;
+        margin-top: 20px;
+      }
+      .pagination .page-item .page-link {
+        color: white;
+        background-color: transparent;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin: 0 5px;
+      }
+      .pagination .page-item.active .page-link {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+      }
+      .pagination .page-item:hover .page-link {
+        background-color: #6a94be;
+        backdrop-filter: blur(20px);
+      }
+      .btn-primary {
+        background-color: #6a94be;
+        border-color: #6a94be;
+        font-size: 16px;
+        border-radius: 5px;
+        transition: background-color 0.3s, border-color 0.3s;
+      }
+      .btn-primary:hover {
+        background-color: #56789b;
+        border-color: #56789b;
+      }
+      .btn-warning {
+        background-color: #6a94be;
+        border-color: #6a94be;
+        color: #eff;
+        font-size: 16px;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: background-color 0.3s, border-color 0.3s;
+      }
+      .btn-warning:hover {
+        background-color: #56789b;
+        border-color: #56789b;
+        color: #eff;
+      }
+      .btn-danger {
+        background-color: #21609f;
+        border-color: #21609f;
+        font-size: 16px;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: background-color 0.3s, border-color 0.3s;
+      }
+      .btn-danger:hover {
+        background-color: #184a7b;
+        border-color: #184a7b;
+      }
+      /* Adjusting the font-size for different buttons */
+      .search-button .btn-primary,
+      .add-button .btn-primary,
+      .export-pdf-button .btn-warning,
+      .delete-button .btn-danger,
+      .edit-button .btn-secondary {
+        font-size: 16px;
+        padding: 10px 20px;
+        border-radius: 5px;
+      }
+      .save-button .btn-primary {
+        font-size: 18px;
+        padding: 12px 24px;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="sidebar">
+      <div class="logo-menu">
+        <div class="logo">NightLib</div>
+        <i class="bx bx-menu toggle-btn"></i>
+      </div>
+      <ul class="lists">
+        <li class="list-item">
+          <a href="http://localhost:5000/books">
+            <i class="bx bx-book"></i>
+            <span class="link-name" style="--i: 1">Books</span>
+          </a>
+        </li>
+        <li class="list-item">
+          <a href="http://localhost:5000/members">
+            <i class="bx bx-user"></i>
+            <span class="link-name" style="--i: 2">Members</span>
+          </a>
+        </li>
+        <li class="list-item active">
+          <a href="http://localhost:5000/transactions">
+            <i class="bx bx-cart"></i>
+            <span class="link-name" style="--i: 3">Transactions</span>
+          </a>
+        </li>
+      </ul>
+      <ul class="lists-logout">
+        <li class="list-logout">
+          <a href="http://localhost:5000">
+            <i class="bx bx-log-out"></i>
+            <span class="link-name" style="--i: 5">Logout</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div class="content">
+      <h2>TRANSACTIONS</h2>
+      <div class="container mt-3">
+        <div class="search-add-container mb-3">
+          <input
+            type="text"
+            id="searchInput"
+            class="form-control"
+            placeholder="Search by title"
+          />
+          <a
+            href="http://localhost:5000/add_loans"
+            class="btn btn-primary"
+            role="button"
+            >Add Loans</a
+          >
+        </div>
+      </div>
+      <div class="table-container">
+        <center>
+          <table>
+            <thead>
+              <tr>
+                <th>Loan ID</th>
+                <th>User ID</th>
+                <th>Book ID</th>
+                <th>Loan Date</th>
+                <th>Due Date</th>
+                <th>Return Date</th>
+                <th>Penalty</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <br />
+              {% for row in container %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>
+                      {% if row[3] and row[3] != '' %}{{
+                      row[3]|datetimeformat('%d/%m/%Y') }}{% else %}00-00-0000{%
+                      endif %}
+                    </td>
+                    <td>
+                      {% if row[4] and row[4] != '' %}{{
+                      row[4]|datetimeformat('%d/%m/%Y') }}{% else %}00-00-0000{%
+                      endif %}
+                    </td>
+                    <td>
+                      {% if row[5] and row[5] != '' %}{{
+                      row[5]|datetimeformat('%d/%m/%Y') }}{% else %}00-00-0000{%
+                      endif %}
+                    </td>
+                    <td>{{ row[6] }}</td>
+                    <td>
+                      <div class="btn-group" role="group">
+                        <a
+                          href="http://localhost:5000/edit_returns/{{row[0]}}/{{row[2]}}"
+                          class="btn btn-warning"
+                          role="button"
+                          ><i class='bx bx-home-alt'></i
+                        ></a>
+                        <a
+                          href="http://localhost:5000/delete_transaction/{{row[0]}}"
+                          class="btn btn-danger"
+                          role="button"
+                          onclick="return confirm('Are you sure you want to delete? This data will permanently lost.')"
+                          ><i class="bx bx-folder-minus"></i
+                        ></a>
+                      </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </center>
+      </div>
+      <!-- Pagination -->
+      <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" id="previous">
+            <a class="page-link" href="#"
+              ><i class="bx bx-chevrons-left"></i
+            ></a>
+          </li>
+          <li class="page-item" id="page1">
+            <button class="page-link btn btn-link">1</button>
+          </li>
+          <li class="page-item" id="page2">
+            <button class="page-link btn btn-link">2</button>
+          </li>
+          <li class="page-item" id="page3">
+            <button class="page-link btn btn-link">3</button>
+          </li>
+          <li class="page-item" id="next">
+            <a class="page-link" href="#"
+              ><i class="bx bx-chevrons-right"></i
+            ></a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <script>
+      var currentPage = 1;
+      var itemsPerPage = 4;
+      var totalRows = document.querySelectorAll("tbody tr").length;
+      function displayData(page) {
+        var startIndex = (page - 1) * itemsPerPage;
+        var endIndex = startIndex + itemsPerPage;
+        var rows = document.querySelectorAll("tbody tr");
+        for (var i = 0; i < rows.length; i++) {
+          if (i >= startIndex && i < endIndex) {
+            rows[i].style.display = "";
+          } else {
+            rows[i].style.display = "none";
+          }
+        }
+      }
+      function updatePaginationButtons() {
+        var totalPages = Math.ceil(totalRows / itemsPerPage);
+        var page1 = document.getElementById("page1");
+        var page2 = document.getElementById("page2");
+        var page3 = document.getElementById("page3");
+        if (currentPage <= 3) {
+          page1.innerHTML = '<button class="page-link btn btn-link">1</button>';
+          page2.innerHTML = '<button class="page-link btn btn-link">2</button>';
+          page3.innerHTML = '<button class="page-link btn btn-link">3</button>';
+        } else {
+          page1.innerHTML =
+            '<button class="page-link btn btn-link">' +
+            (currentPage - 1) +
+            "</button>";
+          page2.innerHTML =
+            '<button class="page-link btn btn-link">' +
+            currentPage +
+            "</button>";
+          page3.innerHTML =
+            '<button class="page-link btn btn-link">' +
+            (currentPage + 1) +
+            "</button>";
+        }
+      }
+      displayData(currentPage);
+      updatePaginationButtons();
+      document
+        .getElementById("previous")
+        .addEventListener("click", function () {
+          if (currentPage > 1) {
+            currentPage--;
+            displayData(currentPage);
+            updatePaginationButtons();
+          }
+        });
+      document.getElementById("next").addEventListener("click", function () {
+        if (currentPage < Math.ceil(totalRows / itemsPerPage)) {
+          currentPage++;
+          displayData(currentPage);
+          updatePaginationButtons();
+        }
+      });
+      document.getElementById("page1").addEventListener("click", function () {
+        currentPage = parseInt(this.textContent);
+        displayData(currentPage);
+        updatePaginationButtons();
+      });
+      document.getElementById("page2").addEventListener("click", function () {
+        currentPage = parseInt(this.textContent);
+        displayData(currentPage);
+        updatePaginationButtons();
+      });
+      document.getElementById("page3").addEventListener("click", function () {
+        currentPage = parseInt(this.textContent);
+        displayData(currentPage);
+        updatePaginationButtons();
+      });
+      // Search function
+      document
+        .getElementById("searchInput")
+        .addEventListener("keyup", function () {
+          var searchText = this.value.toLowerCase();
+          var rows = document.querySelectorAll("tbody tr");
+          for (var i = 0; i < rows.length; i++) {
+            var rowText = rows[i].textContent.toLowerCase();
+            if (rowText.includes(searchText)) {
+              rows[i].style.display = "";
+            } else {
+              rows[i].style.display = "none";
+            }
+          }
+          currentPage = 1; // Reset to the first page after search
+          updatePaginationButtons();
+        });
+      document
+        .querySelector(".toggle-btn")
+        .addEventListener("click", function () {
+          const sidebar = document.querySelector(".sidebar");
+          const content = document.querySelector(".content");
+          sidebar.classList.toggle("active");
+          content.classList.toggle("active");
+        });
+    </script>
+    </script>
+  </body>
+</html>

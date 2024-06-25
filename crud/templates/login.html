@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NightLib</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      body {
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-image: url(static/foto/NightForest.jpg);
+        background-position: center;
+        background-size: cover;
+      }
+      .wrapper {
+        width: 420px;
+        background: transparent;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        padding: 30px 40px;
+        color: #eff;
+        overflow: hidden;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transition: height 0.2s ease;
+        z-index: 100;
+      }
+      .wrapper h2 {
+        font-size: 36px;
+        text-align: center;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+      .input-box {
+        position: relative;
+        width: 100%;
+        height: 50px;
+        margin: 30px 0;
+      }
+      .input-box input {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: none;
+        outline: none;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        padding: 0 20px;
+        border-radius: 5px;
+        color: #eff;
+        font-size: 16px;
+      }
+      .input-box input::placeholder {
+        color: rgba(255, 255, 255, 0.497);
+      }
+      .input-box i {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+        color: #fff;
+      }
+      .remember-forgot {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        margin: -15px 0 15px;
+      }
+      .remember-forgot label {
+        display: flex;
+        align-items: center;
+      }
+      .remember-forgot label input {
+        accent-color: #eff;
+        margin-right: 5px;
+      }
+      .remember-forgot a {
+        color: #eff;
+        text-decoration: none;
+      }
+      .remember-forgot a:hover {
+        text-decoration: underline;
+      }
+      .btn {
+        width: 100%;
+        height: 45px;
+        background: #eff;
+        border: none;
+        outline: none;
+        border-radius: 40px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        font-size: 16px;
+        color: #1c5167;
+        font-weight: 600;
+      }
+      .register-link {
+        font-size: 16px;
+        text-align: center;
+        margin: 20px 0 15px;
+      }
+      .register-link p a {
+        color: #eff;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .register-link p a:hover {
+        text-decoration: underline;
+      }
+      .form-container {
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
+      .form-container.active {
+        display: block;
+      }
+      .wrapper .form-container.active {
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper" id="wrapper">
+      <div id="login-form" class="form-container active">
+        <h2>Login</h2>
+        <form method="POST" action="{{ url_for('login') }}">
+          <div class="input-box">
+            <input
+              type="text"
+              name="username"
+              placeholder="Username"
+              required
+            />
+            <i class="bx bxs-user"></i>
+          </div>
+          <div class="input-box">
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              required
+            />
+            <i class="bx bxs-lock"></i>
+          </div>
+          <div class="remember-forgot">
+            <label><input type="checkbox" /> Remember me</label>
+          </div>
+          <button type="submit" class="btn">Login</button>
+          <div class="register-link">
+            <p>
+              Don't have an account? <a href="#" id="show-register">Register</a>
+            </p>
+          </div>
+        </form>
+      </div>
+      <!-- Register Form -->
+      <div id="register-form" class="form-container">
+        <h2>Register</h2>
+        <form method="POST" action="{{ url_for('register') }}">
+          <div class="input-box">
+            <input
+              type="text"
+              id="nik"
+              name="nik"
+              placeholder="User ID"
+              required
+            />
+            <i class="bx bx-id-card"></i>
+          </div>
+          <div class="input-box">
+            <input type="email" name="email" placeholder="Email" required />
+            <i class="bx bxs-envelope"></i>
+          </div>
+          <div class="input-box">
+            <input
+              type="text"
+              name="username"
+              placeholder="Username"
+              required
+            />
+            <i class="bx bxs-user"></i>
+          </div>
+          <div class="input-box">
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              required
+            />
+            <i class="bx bxs-lock"></i>
+          </div>
+          <button type="submit" class="btn">Register</button>
+          <div class="register-link">
+            <p>
+              Already have an account? <a href="#" id="show-login">Login</a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script>
+      document
+        .getElementById("show-register")
+        .addEventListener("click", function () {
+          document.getElementById("login-form").classList.remove("active");
+          document.getElementById("register-form").classList.add("active");
+          document.getElementById("wrapper").style.height = "550px";
+        });
+      document
+        .getElementById("show-login")
+        .addEventListener("click", function () {
+          document.getElementById("register-form").classList.remove("active");
+          document.getElementById("login-form").classList.add("active");
+          document.getElementById("wrapper").style.height = "420px";
+        });
+      window.onload = function () {
+        document.getElementById("wrapper").style.height = "420px";
+        document.getElementById("wrapper").classList.add("active");
+      };
+    </script>
+  </body>
+</html>
